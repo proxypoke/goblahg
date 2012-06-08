@@ -12,13 +12,14 @@ import (
 	"github.com/russross/blackfriday"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
 
 type Post struct {
 	Content, Title string
-	when           time.Time
+	When           time.Time
 }
 
 // Naive basename implementation.
@@ -36,6 +37,11 @@ func FromFile(path string) (p Post, err error) {
 	}
 	p.Content = string(blackfriday.MarkdownBasic(raw))
 	p.Title = basename(path)
+	info, err := os.Stat(path)
+	if err != nil {
+		return
+	}
+	p.When = info.ModTime()
 	return
 }
 
