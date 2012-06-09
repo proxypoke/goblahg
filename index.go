@@ -66,9 +66,9 @@ func LoadDir(path string) (posts Posts) {
 	return
 }
 
-func (posts Posts) Serve() (func (http.ResponseWriter, *http.Request)) {
+func (posts Posts) Serve(path string) func(http.ResponseWriter, *http.Request) {
 	handle := func(w http.ResponseWriter, req *http.Request) {
-		posts = LoadDir(".")
+		posts = LoadDir(path)
 		sort.Sort(&posts)
 
 		fmt.Fprintln(w, "<html>")
@@ -88,7 +88,8 @@ func (posts Posts) Serve() (func (http.ResponseWriter, *http.Request)) {
 
 		for _, post := range posts {
 			fmt.Fprint(w, "<li>")
-			fmt.Fprintf(w, "<a href=/%s>%s</a>", post.Title, post.Title)
+			fmt.Fprintf(w, "<a href=/%s>%s</a>",
+				strings.ToLower(post.Title), post.Title)
 			fmt.Fprint(w, "</li>")
 		}
 	}
@@ -98,4 +99,3 @@ func (posts Posts) Serve() (func (http.ResponseWriter, *http.Request)) {
 func (posts Posts) Add(p Post) {
 	posts = append(posts, p)
 }
-

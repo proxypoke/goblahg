@@ -8,17 +8,24 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 )
 
 func main() {
+	var confpath string
+	flag.StringVar(&confpath, "config", "./blahgrc", "path to config")
+	flag.Parse()
+
+	conf := LoadConfig(confpath)
+
 	updates := make(chan Posts)
 	// writes updates
-	go WatchDir(".", updates)
+	go WatchDir(conf.Path, updates, conf.Intervall)
 
 	posts := <-updates
-	go http.HandleFunc("/", posts.Serve())
+	go http.HandleFunc("/", posts.Serve(conf.Path))
 
 	// reads updates
 	go ServeBlog(updates)

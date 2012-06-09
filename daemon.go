@@ -14,7 +14,7 @@ import (
 )
 
 // Regularly load a directory and write the posts in the given channel.
-func WatchDir(path string, writeback chan Posts) {
+func WatchDir(path string, writeback chan Posts, tick time.Duration) {
 	// TODO: reloading updates of existing posts
 	var known Posts
 	for {
@@ -29,7 +29,7 @@ func WatchDir(path string, writeback chan Posts) {
 			}
 		}
 		writeback <- updates
-		time.Sleep(30 * time.Second)
+		time.Sleep(tick)
 	}
 }
 
