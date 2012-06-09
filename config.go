@@ -15,7 +15,7 @@ import (
 )
 
 type Config struct {
-	Path      string // where the directory with the posts is located
+	Path      string        // where the directory with the posts is located
 	Intervall time.Duration // how often to reload posts, in minutes
 }
 

@@ -52,10 +52,13 @@ func (posts Posts) Contains(p Post) bool {
 
 func LoadDir(path string) (posts Posts) {
 	// the error doesn't matter, we'll just return no posts
+	if !strings.HasSuffix(path, "/") {
+		path += "/"
+	}
 	files, _ := ioutil.ReadDir(path)
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), ".md") {
-			post, err := FromFile(file.Name())
+			post, err := FromFile(path + file.Name())
 			if err != nil {
 				log.Print(err)
 				continue

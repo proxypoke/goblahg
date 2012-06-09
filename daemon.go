@@ -25,7 +25,6 @@ func WatchDir(path string, writeback chan Posts, tick time.Duration) {
 			if !known.Contains(post) {
 				updates = append(updates, post)
 				known = append(known, post)
-
 			}
 		}
 		writeback <- updates
