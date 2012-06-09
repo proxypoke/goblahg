@@ -13,12 +13,13 @@ import (
 )
 
 func main() {
-	p, err := FromFile("foobar.md")
-	if err != nil {
-		log.Fatal(err)
-	}
-	http.HandleFunc(p.Serve())
-	err = http.ListenAndServe(":8080", nil)
+	updates := make(chan Posts)
+	// writes updates
+	go WatchDir(".", updates)
+	// reads updates
+	go ServeBlog(updates)
+
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
