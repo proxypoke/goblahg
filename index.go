@@ -91,8 +91,10 @@ func (posts Posts) Serve(path string) func(http.ResponseWriter, *http.Request) {
 
 		for _, post := range posts {
 			fmt.Fprint(w, "<li>")
+			r := strings.NewReplacer("_", " ")
+			title := r.Replace(post.Title)
 			fmt.Fprintf(w, "<a href=/%s>%s</a>",
-				strings.ToLower(post.Title), post.Title)
+				strings.ToLower(post.Title), title)
 			fmt.Fprint(w, "</li>")
 		}
 	}

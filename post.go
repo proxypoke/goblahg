@@ -37,6 +37,7 @@ func FromFile(path string) (p Post, err error) {
 	}
 	p.Content = string(blackfriday.MarkdownBasic(raw))
 	p.Title = basename(path)
+
 	info, err := os.Stat(path)
 	if err != nil {
 		return
@@ -52,7 +53,9 @@ func (p Post) Serve() (string, func(http.ResponseWriter, *http.Request)) {
 		defer fmt.Fprintln(w, "</html>")
 
 		fmt.Fprintln(w, "<head>")
-		fmt.Fprintf(w, "<title>%s</title>", p.Title)
+		r := strings.NewReplacer("_", " ")
+		title := r.Replace(p.Title)
+		fmt.Fprintf(w, "<title>%s</title>", title)
 		fmt.Fprintln(w, "</header>")
 
 		fmt.Fprintln(w, "<body>")
