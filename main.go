@@ -16,8 +16,14 @@ func main() {
 	updates := make(chan Posts)
 	// writes updates
 	go WatchDir(".", updates)
+
+	posts := <-updates
+	go http.HandleFunc("/", posts.Serve())
+
 	// reads updates
 	go ServeBlog(updates)
+
+	updates <- posts
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {

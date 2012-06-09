@@ -8,8 +8,10 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -25,11 +27,28 @@ func WatchDir(path string, writeback chan Posts) {
 			if !known.Contains(post) {
 				updates = append(updates, post)
 				known = append(known, post)
+
 			}
 		}
 		writeback <- updates
 		time.Sleep(30 * time.Second)
 	}
+}
+
+func LoadDir(path string) (posts Posts) {
+	// the error doesn't matter, we'll just return no posts
+	files, _ := ioutil.ReadDir(path)
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".md") {
+			post, err := FromFile(file.Name())
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+			posts = append(posts, post)
+		}
+	}
+	return
 }
 
 func ServeBlog(updates chan Posts) {

@@ -8,10 +8,9 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
+	"fmt"
+	"net/http"
 	"sort"
-	"strings"
 )
 
 type Posts []Post
@@ -22,7 +21,7 @@ func (posts *Posts) Len() int {
 
 // This is actually Greater, so it causes a reverse sort
 func (posts *Posts) Less(i, j int) bool {
-	return (*posts)[i].When.Unix() > (*posts)[j].When.Unix() 
+	return (*posts)[i].When.Unix() > (*posts)[j].When.Unix()
 }
 
 func (posts *Posts) Swap(i, j int) {
@@ -48,19 +47,34 @@ func (posts Posts) Contains(p Post) bool {
 	return false
 }
 
+func (posts Posts) Serve() (func (http.ResponseWriter, *http.Request)) {
+	sort.Sort(&posts)
+	handle := func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintln(w, "<html>")
+		defer fmt.Fprintln(w, "</html>")
 
-func LoadDir(path string) (posts Posts) {
-	// the error doesn't matter, we'll just return no posts
-	files, _ := ioutil.ReadDir(path)
-	for _, file := range files {
-		if strings.HasSuffix(file.Name(), ".md") {
-			post, err := FromFile(file.Name())
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-			posts = append(posts, post)
+		fmt.Fprintln(w, "<head>")
+		fmt.Fprintf(w, "<title>%s</title>", "Goblahg")
+		fmt.Fprintln(w, "</head>")
+
+		fmt.Fprintln(w, "<body>")
+		defer fmt.Fprintln(w, "</body>")
+
+		fmt.Fprint(w, "<h2>Most recent posts</h2>")
+
+		fmt.Fprint(w, "<ul>")
+		defer fmt.Fprint(w, "</ul>")
+
+		for _, post := range posts {
+			fmt.Fprint(w, "<li>")
+			fmt.Fprintf(w, "<a href=/%s>%s</a>", post.Title, post.Title)
+			fmt.Fprint(w, "</li>")
 		}
 	}
-	return
+	return handle
 }
+
+func (posts Posts) Add(p Post) {
+	posts = append(posts, p)
+}
+
