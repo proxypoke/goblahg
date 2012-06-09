@@ -9,8 +9,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"sort"
+	"strings"
 )
 
 type Posts []Post
@@ -47,9 +50,27 @@ func (posts Posts) Contains(p Post) bool {
 	return false
 }
 
+func LoadDir(path string) (posts Posts) {
+	// the error doesn't matter, we'll just return no posts
+	files, _ := ioutil.ReadDir(path)
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".md") {
+			post, err := FromFile(file.Name())
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+			posts = append(posts, post)
+		}
+	}
+	return
+}
+
 func (posts Posts) Serve() (func (http.ResponseWriter, *http.Request)) {
-	sort.Sort(&posts)
 	handle := func(w http.ResponseWriter, req *http.Request) {
+		posts = LoadDir(".")
+		sort.Sort(&posts)
+
 		fmt.Fprintln(w, "<html>")
 		defer fmt.Fprintln(w, "</html>")
 
